@@ -7,7 +7,7 @@ def current_year():
     year = datetime.datetime.now().year
     return year    
 
-def view_count(id):
+def package_view_count(id):
     u'''
         Calculate dataset/resource view count and return
         the view_count.html snippet.
