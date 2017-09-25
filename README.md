@@ -59,6 +59,14 @@ If your extension is installed successfully, your page will change to the openAf
 **Note**: This extension, being a thememing extension, may override templates from other extensions. Templates in /ckanext/openafrica/templates 
 may require some modifications to render properly with openAfrica extension.
 
+## Testing the extension
+------------------------
+Some tests have been written for the ckanext-openafrica extention. The test files are located in the tests directory.
+To run the test, simply type this command in your terminal
+```
+nosetests --ckan --with-pylons=test.ini --debug=show
+```
+
 Support
 -------
 If you've found a bug/issue in the extension, open a new issue [here](https://github.com/CodeForAfrica/ckanext-openafrica/issues/new) _ (try
