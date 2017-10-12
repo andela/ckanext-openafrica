@@ -115,6 +115,11 @@ class TestSelenium(unittest.TestCase):
         driver.get(self.base_url)
         self.assertIn("CKAN", driver.title)
 
+    def test_about_page(self):
+        driver = self.driver
+        driver.get(self.base_url + "/about")
+        self.assertIn("About", driver.title)
+
     def tearDown(self):
         self.driver.quit()
         # self.remove_sysadmin()
