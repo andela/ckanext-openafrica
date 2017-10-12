@@ -142,7 +142,6 @@ class TestSelenium(unittest.TestCase):
 
     def tearDown(self):
         self.driver.quit()
-        # self.remove_sysadmin()
 
 
 if __name__ == "__main__":
