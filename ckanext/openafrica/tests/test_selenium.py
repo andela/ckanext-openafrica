@@ -120,10 +120,12 @@ class TestSelenium(unittest.TestCase):
         driver.get(self.base_url + "/about")
         self.assertIn("About", driver.title)
 
-    def tearDown(self):
-        self.driver.quit()
-        # self.remove_sysadmin()
-
+    def test_dataset_create(self):
+        self.register_sysadmin()
+        self.login("selenium_admin", "selenium")
+        title = generate_random_string(10)
+        description = generate_random_string(20)
+        self.create_dataset(title, description)
 
 if __name__ == "__main__":
     unittest.main()
