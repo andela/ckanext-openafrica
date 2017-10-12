@@ -127,5 +127,23 @@ class TestSelenium(unittest.TestCase):
         description = generate_random_string(20)
         self.create_dataset(title, description)
 
+    def test_dataset_update(self):
+        self.register_sysadmin()
+        self.login("selenium_admin", "selenium")
+        title = 'night en day'
+        description = 'patiently'
+        dataset_id = self.create_dataset(title, description)
+
+        updated_description = 'updated description'
+        driver = self.driver
+        driver.get(self.base_url + '/dataset/' + dataset_id)
+        driver.find_element_by_link_text('Manage').click()
+        self.complete_dataset_form(title, updated_description)
+
+    def tearDown(self):
+        self.driver.quit()
+        # self.remove_sysadmin()
+
+
 if __name__ == "__main__":
     unittest.main()
