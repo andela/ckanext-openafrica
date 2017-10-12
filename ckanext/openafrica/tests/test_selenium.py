@@ -4,7 +4,6 @@ import ckan.model as model
 from selenium import webdriver
 from random import choice
 import ckan.lib.search.index as search_index
-import ckanext.datarequests.db as db
 import pexpect
 
 
@@ -34,7 +33,7 @@ class TestSelenium(unittest.TestCase):
         env = os.environ.copy()
         env['DEBUG'] = 'True'
         env['OAUTHLIB_INSECURE_TRANSPORT'] = 'True'
-        self.driver = webdriver.Chrome(env["WEB_DRIVER_URL"])
+        self.driver = webdriver.Chrome()
         self.base_url = 'http://127.0.0.1:5000'
         self.register_sysadmin()
 
@@ -125,12 +124,16 @@ class TestSelenium(unittest.TestCase):
         self.complete_dataset_form(title, description)
         return driver.current_url.split('/')[-1]
 
-    def test_organization_create(self):
-        self.register_sysadmin()
-        self.login("selenium_admin", "selenium")
-        title = "test_org"
-        description = "test_organization"
-        self.create_organization(title, description)
+    def delete_dataset(self):
+        self.child = pexpect.spawn('paster', ['--plugin=ckan', 'dataset', 'purge', 'test_dataset', '-c', '/etc/ckan/default/production.ini'])
+        self.child.expect('test_dataset purged')
+
+    # def test_organization_create(self):
+    #     self.register_sysadmin()
+    #     self.login("selenium_admin", "selenium")
+    #     title = "test_org"
+    #     description = "test_organization"
+    #     self.create_organization(title, description)
 
     def test_about_page(self):
         driver = self.driver
@@ -140,14 +143,15 @@ class TestSelenium(unittest.TestCase):
     def test_dataset_create(self):
         self.register_sysadmin()
         self.login("selenium_admin", "selenium")
-        title = generate_random_string(10)
+        title = "test_dataset"
         description = generate_random_string(20)
         self.create_dataset(title, description)
+
 
     def test_dataset_update(self):
         self.register_sysadmin()
         self.login("selenium_admin", "selenium")
-        title = 'night en day'
+        title = 'test_dataset'
         description = 'patiently'
         dataset_id = self.create_dataset(title, description)
         updated_description = 'updated description'
@@ -158,7 +162,7 @@ class TestSelenium(unittest.TestCase):
 
     def tearDown(self):
         self.driver.quit()
-
+        self.delete_dataset()
 
 if __name__ == "__main__":
     unittest.main()
