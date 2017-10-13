@@ -1,9 +1,7 @@
 import os
 import unittest
-import ckan.model as model
 from selenium import webdriver
 from random import choice
-import ckan.lib.search.index as search_index
 import pexpect
 
 
@@ -128,12 +126,12 @@ class TestSelenium(unittest.TestCase):
         self.child = pexpect.spawn('paster', ['--plugin=ckan', 'dataset', 'purge', 'test_dataset', '-c', '/etc/ckan/default/production.ini'])
         self.child.expect('test_dataset purged')
 
-    # def test_organization_create(self):
-    #     self.register_sysadmin()
-    #     self.login("selenium_admin", "selenium")
-    #     title = "test_org"
-    #     description = "test_organization"
-    #     self.create_organization(title, description)
+    def test_organization_create(self):
+        self.register_sysadmin()
+        self.login("selenium_admin", "selenium")
+        title = "test_org"
+        description = "test_organization"
+        self.create_organization(title, description)
 
     def test_about_page(self):
         driver = self.driver
