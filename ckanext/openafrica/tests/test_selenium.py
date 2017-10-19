@@ -3,6 +3,14 @@ import unittest
 from selenium import webdriver
 from random import choice
 import pexpect
+import ckan.logic as logic
+from string import ascii_uppercase
+from ckan.config.environment import load_environment
+from paste.deploy import appconfig
+
+
+NotFound = ckan.logic.NotFound
+_check_access = ckan.logic.check_access
 
 
 def generate_random_string(length):
@@ -34,20 +42,20 @@ class TestSelenium(unittest.TestCase):
         self.driver = webdriver.Chrome()
         self.base_url = 'http://127.0.0.1:5000'
         self.register_sysadmin()
-
-
+        self.driver.set_window_size(1024, 768)
+        conf = appconfig('config:/etc/ckan/default/production.ini', relative_to='.')
+        load_environment(conf.global_conf, conf.local_conf)
 
     def create_organization(self, name, description):
         driver = self.driver
         driver.get(self.base_url)
-        driver.find_element_by_link_text('Organizations').click()
+        driver.find_element_by_link_text('Organisations').click()
         driver.find_element_by_link_text('Add Organization').click()
         driver.find_element_by_id('field-name').clear()
         driver.find_element_by_id('field-name').send_keys(name)
         driver.find_element_by_id('field-description').clear()
         driver.find_element_by_id('field-description').send_keys(description)
         driver.find_element_by_name('save').click()
-
 
     def register_user(self, username, fullname, mail, password):
         # register a normal user
@@ -94,17 +102,6 @@ class TestSelenium(unittest.TestCase):
             # Sysadmin probably exists already
             pass
 
-    def create_organization(self, name, description):
-        driver = self.driver
-        driver.get(self.base_url)
-        driver.find_element_by_link_text('Organizations').click()
-        driver.find_element_by_link_text('Add Organization').click()
-        driver.find_element_by_id('field-name').clear()
-        driver.find_element_by_id('field-name').send_keys(name)
-        driver.find_element_by_id('field-description').clear()
-        driver.find_element_by_id('field-description').send_keys(description)
-        driver.find_element_by_name('save').click()
-
     def complete_dataset_form(self, title, description):
         driver = self.driver
         driver.find_element_by_id('field-title').clear()
@@ -126,12 +123,18 @@ class TestSelenium(unittest.TestCase):
         self.child = pexpect.spawn('paster', ['--plugin=ckan', 'dataset', 'purge', 'test_dataset', '-c', '/etc/ckan/default/production.ini'])
         self.child.expect('test_dataset purged')
 
+    def delete_org(name):
+        logic.get_action('organization_purge')({'ignore_auth': True}, {'id': name})
+
     def test_organization_create(self):
         self.register_sysadmin()
         self.login("selenium_admin", "selenium")
-        title = "test_org"
-        description = "test_organization"
-        self.create_organization(title, description)
+        self.create_organization("test_organisation", "test")
+        self.delete_org("test_orgnisation")
+
+
+    def test_landing_page(self):
+        pass
 
     def test_about_page(self):
         driver = self.driver
@@ -144,7 +147,7 @@ class TestSelenium(unittest.TestCase):
         title = "test_dataset"
         description = generate_random_string(20)
         self.create_dataset(title, description)
-
+        self.delete_dataset()
 
     def test_dataset_update(self):
         self.register_sysadmin()
@@ -157,10 +160,11 @@ class TestSelenium(unittest.TestCase):
         driver.get(self.base_url + '/dataset/' + dataset_id)
         driver.find_element_by_link_text('Manage').click()
         self.complete_dataset_form(title, updated_description)
+        self.delete_dataset()
 
     def tearDown(self):
         self.driver.quit()
-        self.delete_dataset()
+
 
 if __name__ == "__main__":
     unittest.main()
