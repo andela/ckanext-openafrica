@@ -9,10 +9,6 @@ from ckan.config.environment import load_environment
 from paste.deploy import appconfig
 
 
-NotFound = ckan.logic.NotFound
-_check_access = ckan.logic.check_access
-
-
 def generate_random_string(length):
     return ''.join(choice(ascii_uppercase) for i in range(length))
 
@@ -123,25 +119,26 @@ class TestSelenium(unittest.TestCase):
         self.child = pexpect.spawn('paster', ['--plugin=ckan', 'dataset', 'purge', 'test_dataset', '-c', '/etc/ckan/default/production.ini'])
         self.child.expect('test_dataset purged')
 
-    def delete_org(name):
+    def delete_org(self, name):
         logic.get_action('organization_purge')({'ignore_auth': True}, {'id': name})
 
     def test_organization_create(self):
         self.register_sysadmin()
         self.login("selenium_admin", "selenium")
         self.create_organization("test_organisation", "test")
-        self.delete_org("test_orgnisation")
+        self.driver.get(self.base_url + "/organization")
+        assert "test_organisation" in self.driver.page_source
+        self.delete_org("test_organisation")
 
     def test_landing_page(self):
         driver = self.driver
         driver.get(self.base_url)
-        assert "Welcome to Ckan" in driver.title
-
+        assert "Welcome - CKAN" in driver.title
 
     def test_about_page(self):
         driver = self.driver
         driver.get(self.base_url + "/about")
-        self.assertIn("About", driver.title)
+        assert "About" in self.driver.title
 
     def test_dataset_create(self):
         self.register_sysadmin()
@@ -149,6 +146,8 @@ class TestSelenium(unittest.TestCase):
         title = "test_dataset"
         description = generate_random_string(20)
         self.create_dataset(title, description)
+        self.driver.get(self.base_url + "/dataset/test_dataset")
+        assert "test_dataset" in self.driver.title
         self.delete_dataset()
 
     def test_dataset_update(self):
@@ -156,12 +155,14 @@ class TestSelenium(unittest.TestCase):
         self.login("selenium_admin", "selenium")
         title = 'test_dataset'
         description = 'patiently'
-        dataset_id = self.create_dataset(title, description)
+        self.create_dataset(title, description)
         updated_description = 'updated description'
         driver = self.driver
-        driver.get(self.base_url + '/dataset/' + dataset_id)
+        driver.get(self.base_url + '/dataset/test_dataset')
         driver.find_element_by_link_text('Manage').click()
         self.complete_dataset_form(title, updated_description)
+        description_assert = driver.find_element_by_css_selector('p')
+        assert "updated description" in description_assert.text
         self.delete_dataset()
 
     def tearDown(self):
