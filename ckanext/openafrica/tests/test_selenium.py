@@ -132,9 +132,11 @@ class TestSelenium(unittest.TestCase):
         self.create_organization("test_organisation", "test")
         self.delete_org("test_orgnisation")
 
-
     def test_landing_page(self):
-        pass
+        driver = self.driver
+        driver.get(self.base_url)
+        assert "Welcome to Ckan" in driver.title
+
 
     def test_about_page(self):
         driver = self.driver
