@@ -6,6 +6,7 @@ import pexpect
 import ckan.logic as logic
 from string import ascii_uppercase
 from ckan.config.environment import load_environment
+from selenium.webdriver.common.by import By
 from paste.deploy import appconfig
 
 
@@ -147,7 +148,7 @@ class TestSelenium(unittest.TestCase):
         description = generate_random_string(20)
         self.create_dataset(title, description)
         self.driver.get(self.base_url + "/dataset/test_dataset")
-        assert "test_dataset" in self.driver.title
+        self.assertIn("test_dataset", self.driver.title)
         self.delete_dataset()
 
     def test_dataset_update(self):
@@ -161,6 +162,7 @@ class TestSelenium(unittest.TestCase):
         driver.get(self.base_url + '/dataset/test_dataset')
         driver.find_element_by_link_text('Manage').click()
         self.complete_dataset_form(title, updated_description)
+        driver.get(self.base_url + '/dataset/test_dataset')
         description_assert = driver.find_element_by_css_selector('p')
         assert "updated description" in description_assert.text
         self.delete_dataset()
